@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Command-Interface", "Command-Interface\Command-Interface.csproj", "{CD765028-DFEC-4D60-856B-D825BEA4631B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandPluginLib", "Command-Interface\libs\CommandPluginLib\CommandPluginLib\CommandPluginLib.csproj", "{B328D3A4-2516-488F-B93B-63986C0E5348}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{CD765028-DFEC-4D60-856B-D825BEA4631B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD765028-DFEC-4D60-856B-D825BEA4631B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD765028-DFEC-4D60-856B-D825BEA4631B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B328D3A4-2516-488F-B93B-63986C0E5348}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B328D3A4-2516-488F-B93B-63986C0E5348}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B328D3A4-2516-488F-B93B-63986C0E5348}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B328D3A4-2516-488F-B93B-63986C0E5348}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

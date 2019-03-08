@@ -14,7 +14,7 @@ namespace Command_Interface
 {
     public class Plugin : IPlugin
     {
-        public string Name => "Plugin Name";
+        public string Name => "Command-Interface";
         public string Version => "0.0.1";
 
         bool doesPluginExist;
@@ -26,7 +26,8 @@ namespace Command_Interface
 
             //Checks if a IPlugin with the name in quotes exists, in case you want to verify a plugin exists before trying to reference it, or change how you do things based on if a plugin is present
             doesPluginExist = IllusionInjector.PluginManager.Plugins.Any(x => x.Name == "Saber Mod");
-
+            var CI_obj = new GameObject("CIHTTPServer").AddComponent<CIHTTPServer>();
+            GameObject.DontDestroyOnLoad(CI_obj);
 
         }
 
@@ -36,7 +37,7 @@ namespace Command_Interface
             if (newScene.name == "Menu")
             {
                 //Code to execute when entering The Menu
-
+                
 
             }
 
