@@ -14,13 +14,15 @@ namespace Command_Interface
 {
     public class Plugin : IPlugin
     {
-        public string Name => "Command-Interface";
+        public static string PluginName => "Command-Interface";
+        public string Name => PluginName;
         public string Version => "0.0.1";
 
         bool doesPluginExist;
 
         public void OnApplicationStart()
         {
+            Logger.LogLevel = LogLevel.Trace;
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
             SceneManager.sceneLoaded += SceneManager_sceneLoaded;
 
@@ -28,6 +30,7 @@ namespace Command_Interface
             doesPluginExist = IllusionInjector.PluginManager.Plugins.Any(x => x.Name == "Saber Mod");
             var CI_obj = new GameObject("CIHTTPServer").AddComponent<CIHTTPServer>();
             GameObject.DontDestroyOnLoad(CI_obj);
+            Logger.Debug($"Created CIHTTPServer GameObject: {CI_obj.name}");
 
         }
 

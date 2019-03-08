@@ -12,7 +12,7 @@ using CommandPluginLib;
 
 namespace Command_Interface
 {
-    public class CIHTTPServer : MonoBehaviour
+    public class CIHTTPServer : MonoBehaviour, ICommandPlugin
     {
         private static CIHTTPServer _instance;
         public static CIHTTPServer Instance
@@ -25,97 +25,103 @@ namespace Command_Interface
 
         private int _serverPort = 6558;
         private WebSocketServer _server;
+        private CommandBehavior _comService;
+        private Dictionary<string, ICommandPlugin> _plugins;
+
+        public event Action<MessageData> MessageReady;
+
+        public Dictionary<string, ICommandPlugin> Plugins
+        {
+            get
+            {
+                var plugins = this.GetComponents<ICommandPlugin>().Where(p => !(p is CIHTTPServer)).ToList();
+                var dict = new Dictionary<string, ICommandPlugin>();
+                foreach (var plug in plugins)
+                {
+                    Logger.Trace($"Adding component {plug.PluginName} to dictionary");
+                    dict.AddSafe(plug.PluginName, plug);
+                    _comService.RegisterPlugin(plug);
+                }
+                return dict;
+            }
+        }
+
+        public string PluginName => Plugin.PluginName;
+
+        public Dictionary<string, Action<string>> Commands => throw new NotImplementedException();
 
         private void Start()
         {
-            Console.WriteLine("Starting CIHTTPServer...");
+            Logger.Debug("Starting CIHTTPServer...");
             if (_instance != null)
             {
-                Console.WriteLine("CIHTTPServer already exists, destroying...");
+                Logger.Warning("CIHTTPServer already exists, destroying...");
                 Destroy(_instance);
             }
             _instance = this;
             InitServer();
+            CheckPlugins();
+            
+        }
+
+        public void CheckPlugins()
+        {
+            /*
+            var plugins = this.GetComponents<ICommandPlugin>().Where(p => !(p is CIHTTPServer)).ToList();
+            var dict = new Dictionary<string, ICommandPlugin>();
+            plugins.Where(p => Plugins.ContainsKey(p.PluginName)).ToList().ForEach(plug => {
+                Logger.Trace($"Adding component {plug.PluginName} to dictionary");
+                dict.AddSafe(plug.PluginName, plug);
+                _comService.RegisterPlugin(plug);
+            });
+            */
+            var thing = Plugins.Values;
         }
 
         private void OnDestroy()
         {
-            Console.WriteLine("Destroying CIHTTPServer...");
+            Logger.Debug("Destroying CIHTTPServer...");
             StopServer();
         }
         public void InitServer()
         {
-            Console.WriteLine("Initializing server...");
+            Logger.Info("Initializing server...");
             _server = new WebSocketServer(_serverPort);
-            _server.AddWebSocketService<CommandBehavior>("/socket", behavior => behavior.Setup(_server));
+            _server.AddWebSocketService<CommandBehavior>("/socket", behavior => {
+                _comService = behavior;
+                _comService.Setup(Instance);
+            });
             _server.Log.Output = (_, __) => { }; // Disable error output
             _server.Start();
+            
         }
 
         public void StopServer()
         {
-            Console.WriteLine("Stopping server...");
+            Logger.Debug("Stopping server...");
             _server.Stop();
         }
-    }
 
-    public class CommandBehavior : WebSocketBehavior
-    {
-        public void Setup(WebSocketServer server)
+
+        /// <summary>
+        /// Received message from plugin.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void OnMessage(object sender, MessageData e)
         {
-            Console.WriteLine("CommandBehavior Setup()");
-            SceneManager.activeSceneChanged += OnSceneChange;
+            ICommandPlugin s = (ICommandPlugin) sender;
+            if (e.Destination == "Command-Interface" && e.Data == "REGISTER")
+                _comService.RegisterPlugin(s);
+            else
+                MessageReady(e);
         }
 
-        protected override void OnMessage(MessageEventArgs e)
+        public void Initialize()
         {
-            Console.WriteLine("Received message...");
-            var msg = e.Data.ToString() == "BALUS"
-                ? "I've been balused already..."
-                : "I'm not available now.";
-            Console.WriteLine($"Sending: {e.Data}\n{msg}");
-            Send($"{e.Data}\n{msg}");
-
-        }
-
-        protected override void OnClose(CloseEventArgs e)
-        {
-            Console.WriteLine($"Connection closed because: {e.Reason}");
-            SceneManager.activeSceneChanged -= OnSceneChange;
-            base.OnClose(e);
-        }
-
-        public void OnSceneChange(Scene oldScene, Scene newScene)
-        {
-            try
-            {
-                if (newScene.name == "Menu")
-                {
-                    //Code to execute when entering The Menu
-                    var testMessage = new MessageData("OBSControl", "OBSControl", "", "STOPREC");
-                    Logger.Trace($"In menu, sending message:\n{testMessage.ToString()}");
-                    Send(testMessage.ToJSON());
-
-                }
-
-                if (newScene.name == "GameCore")
-                {
-                    //Code to execute when entering actual gameplay
-                    var testMessage = new MessageData("OBSControl", "OBSControl", "", "STARTREC");
-                    Logger.Trace($"In GameCore, sending message:\n{testMessage.ToString()}");
-                    Send(testMessage.ToJSON());
-
-                }
-            } catch (Exception ex)
-            {
-                Console.WriteLine($"{ex.Message}\n{ex.StackTrace}");
-            }
-
-        }
-
-        public void OnSendComplete(bool finished)
-        {
-            Console.WriteLine($"Completed? {finished}");
+            throw new NotImplementedException();
         }
     }
+
+    
 }
