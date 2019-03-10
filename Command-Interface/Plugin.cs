@@ -22,7 +22,7 @@ namespace Command_Interface
 
         public void OnApplicationStart()
         {
-            Logger.LogLevel = LogLevel.Trace;
+            Logger.LogLevel = LogLevel.Error;
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
             SceneManager.sceneLoaded += SceneManager_sceneLoaded;
 
